@@ -10,23 +10,33 @@ class URL:
         # path = "/index.html"
         # print(url.split("://", 1)) ['http', 'www.example.com']
         self.scheme, url = url.split("://", 1)
-        assert self.scheme in ["http", "https"]
+        assert self.scheme in ["http", "https", "file"]
 
-        if self.scheme == "https":
-            self.port = 443
-        elif self.scheme == "http":
-            self.port = 80
-                    
-        if "/" not in url:
-            url = url + "/"
-        self.host, url = url.split("/", 1)
-        self.path = "/" + url
+        if self.scheme in ["http", "https"]:
+            if self.scheme == "https":
+                self.port = 443
+            elif self.scheme == "http":
+                self.port = 80
+                        
+            if "/" not in url:
+                url = url + "/"
+            self.host, url = url.split("/", 1)
+            self.path = "/" + url
 
-        if ":" in self.host:
-            self.host, port = self.host.split(":", 1)
-            self.port = int(port)
+            if ":" in self.host and self.host != "file":
+                self.host, port = self.host.split(":", 1)
+                self.port = int(port)
+
+        elif self.scheme == "file":
+            self.path = url
+            self.host = None
+            self.port = None
 
     def request(self):
+        if self.scheme == "file":
+            with open(self.path, "r") as f:
+                return f.read()
+        
         # socket connection
         s = socket.socket(
             family=socket.AF_INET,
@@ -42,6 +52,8 @@ class URL:
         # send request
         request = "GET {} HTTP/1.0\r\n".format(self.path)
         request += "Host: {}\r\n".format(self.host)
+        request += "Connection: close\r\n"
+        request += "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36\r\n"
         request += "\r\n"
         # encode converts text into bytes
         s.send(request.encode("utf8"))
@@ -85,6 +97,8 @@ def load(url):
     show(body)
 
 # run only when executing script from command line
+# To open browser: python3 browser.py https://karenaragon.com
+# To open file: python3 browser.py file:///path/to/example_file.htm
 if __name__ == "__main__":
     import sys
     load(URL(sys.argv[1]))
