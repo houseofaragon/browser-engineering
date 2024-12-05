@@ -7,5 +7,5 @@ For HTTPS (Port 443) - OpenSSL
 Netcat does not support encrypted communication. Use openssl instead:
 `echo -e "GET / HTTP/1.1\r\nHost: karenaragon.com\r\nConnection: close\r\n\r\n" | openssl s_client -connect karenaragon.com:443`
 
-Run browser.py
-`python3 browser.py https://karenaragon.com`go
+Run url.py
+`python3 url.py https://karenaragon.com`
